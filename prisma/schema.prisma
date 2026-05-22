@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String          @id @default(uuid())
+  name         String
+  email        String          @unique
+  passwordHash String
+  role         Role            @default(USER)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  movements    StockMovement[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Appointment {
+  id            String            @id @default(uuid())
+  token         String            @unique @default(uuid())
+  clientName    String
+  clientPhone   String
+  clientEmail   String?
+  date          DateTime
+  serviceType   String
+  notes         String?
+  status        AppointmentStatus @default(PENDING)
+  googleEventId String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELED
+  RESCHEDULED
+}
+
+model JewelryItem {
+  id          String          @id @default(uuid())
+  code        String          @unique
+  name        String
+  type        String
+  material    String
+  caratWeight Float?
+  weightGrams Float?
+  stones      String?
+  supplier    String?
+  entryDate   DateTime        @default(now())
+  costValue   Float
+  location    String?
+  status      ItemStatus      @default(AVAILABLE)
+  images      String[]        // Array of URLs
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  movements   StockMovement[]
+}
+
+enum ItemStatus {
+  AVAILABLE
+  CONSIGNED
+  SOLD
+  IN_REPAIR
+}
+
+model StockMovement {
+  id        String       @id @default(uuid())
+  itemId    String
+  type      MovementType
+  date      DateTime     @default(now())
+  notes     String?
+  userId    String
+  item      JewelryItem  @relation(fields: [itemId], references: [id])
+  user      User         @relation(fields: [userId], references: [id])
+}
+
+enum MovementType {
+  IN
+  OUT
+  UPDATE
+}
+
+model SystemSetting {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}

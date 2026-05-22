@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold-50: #fbf8eb;
+  --color-gold-100: #f5eed1;
+  --color-gold-200: #ecdfa8;
+  --color-gold-300: #dfc876;
+  --color-gold-400: #d4b24e;
+  --color-gold-500: #c69b36;
+  --color-gold-600: #ab7d2a;
+  --color-gold-700: #885c24;
+  --color-gold-800: #714b24;
+  --color-gold-900: #603f23;
+  --color-gold-950: #372011;
+
+  --color-background: #0a0a0a;
+  --color-foreground: #ededed;
+  --color-card: #141414;
+  --color-border: #262626;
+
+  --font-sans: var(--font-outfit);
+  --font-serif: var(--font-playfair);
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border, currentColor);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-card/60 backdrop-blur-lg border border-border/50 shadow-xl;
+  }
+  
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-gold-300 via-gold-500 to-gold-400;
+  }
+}

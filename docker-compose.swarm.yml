@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  app:
+    image: juni-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/jewelry_db?schema=public
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=https://june.fluxora.space
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - NODE_ENV=production
+    depends_on:
+      - db
+    volumes:
+      - uploads_data:/app/public/uploads
+    networks:
+      - fluxora_net
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.75"
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.juni.rule=Host(`june.fluxora.space`)"
+        - "traefik.http.routers.juni.entrypoints=websecure"
+        - "traefik.http.routers.juni.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.juni.service=juni"
+        - "traefik.http.services.juni.loadbalancer.server.port=3000"
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: jewelry_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+
+volumes:
+  postgres_data:
+  uploads_data:
+
+networks:
+  fluxora_net:
+    external: true
+  internal:
+    driver: overlay
